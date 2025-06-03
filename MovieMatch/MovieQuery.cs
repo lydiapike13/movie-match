@@ -1,17 +1,17 @@
 ﻿namespace MovieMatch
 {
-    public class MovieQuery(string name, string id, string? year, bool getMovieByName)
+    public class MovieQuery(string name, string id, string year, bool getMovieByName)
     {
-        private string Name = name;
-        private string Id = id;
-        private string Year = year;
-        private bool GetMovieByName = getMovieByName;
+        private readonly string Name = name;
+        private readonly string Id = id;
+        private readonly string Year = year;
+        private readonly bool GetMovieByName = getMovieByName;
 
-        private readonly string apiUrl = "http://www.omdbapi.com";
-        private readonly string apiKey = "&apikey=930aab22";
-        private readonly string titleQuerier = "?t=";
-        private readonly string idQuerier = "?i=";
-        private readonly string yearQuerier = "&y=";
+        private const string apiUrl = "http://www.omdbapi.com";
+        private const string apiKey = "&apikey=930aab22";
+        private const string titleQuerier = "?t=";
+        private const string idQuerier = "?i=";
+        private const string yearQuerier = "&y=";
 
         public string GenerateQuery()
         {
