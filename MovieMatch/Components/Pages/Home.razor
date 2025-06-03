@@ -16,20 +16,20 @@
 
 </div>
 
-<EditForm Model="movieInput" OnValidSubmit="Submit">
+<EditForm Model="movie" OnValidSubmit="Submit">
     <DataAnnotationsValidator />
     <ValidationSummary />
     @if (@getMovieByName)
     {
         <div>
-            <InputText @bind-Value="movieInput.Name" placeholder="Input Movie Name" />
+            <InputText @bind-Value="movieName" placeholder="Input Movie Name" />
             <input type="submit" value="Submit" class="btn btn-primary" />
         </div>
     }
     else
     {
         <div>
-            <InputText @bind-Value="movieInput.Id" placeholder="Input Movie IMDb ID" />
+            <InputText @bind-Value="movieId" placeholder="Input Movie IMDb ID" />
             <input type="submit" value="Submit" class="btn btn-primary" />
         </div>
     }
@@ -62,32 +62,25 @@ else
     private bool getMovieByName = true;
     private Movie movie = new();
     private bool getMovieError;
-    private string reasonPhrase;
-    private string apiUrl = "http://www.omdbapi.com";
-    private string apiKey = "&apikey=930aab22";
-    private string titleQuerier = "?t=";
-    private string idQuerier = "?i=";
+    private string reasonPhrase = string.Empty;
+    private string movieName = string.Empty;
+    private string movieId = string.Empty;
 
-    private MovieInput movieInput = new();
 
     private async void Submit()
     {
-        string query = "";
-        if (getMovieByName && movieInput.Name is not null && movieInput.Name != string.Empty)
+        string url = "";
+        try
         {
-            query = titleQuerier + movieInput.Name.ToLower().Replace(' ', '+');
+            MovieQuery query = new(movieName, movieId, getMovieByName);
+            url = query.GenerateQuery();
         }
-        else if (!getMovieByName && movieInput.Id is not null && movieInput.Id != string.Empty)
-        {
-            query = idQuerier + movieInput.Id.ToLower().Replace(' ', '+');
-        }
-        else
+        catch
         {
             reasonPhrase = "Please input movie name or ID";
             getMovieError = true;
         }
 
-        string url = apiUrl + query + apiKey;
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
 
         var response = await Client.SendAsync(request);
@@ -106,13 +99,8 @@ else
 
     private void ClearData()
     {
-        movieInput.Name = string.Empty;
-        movieInput.Id = string.Empty;
-    }
-
-    public class MovieInput
-    {
-        public string Name { get; set; }
-        public string Id { get; set; }
+        movieName = string.Empty;
+        movieId = string.Empty;
+        movie = new();
     }
 }
