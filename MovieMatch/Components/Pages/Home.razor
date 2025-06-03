@@ -17,12 +17,13 @@
 </div>
 
 <EditForm Model="movie" OnValidSubmit="Submit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+@*     <DataAnnotationsValidator />
+    <ValidationSummary /> *@
     @if (@getMovieByName)
     {
         <div>
             <InputText @bind-Value="movieName" placeholder="Input Movie Name" />
+            <InputText @bind-Value="movieYear" placeholder="Input Movie Year" />
             <input type="submit" value="Submit" class="btn btn-primary" />
         </div>
     }
@@ -64,6 +65,7 @@ else
     private bool getMovieError;
     private string reasonPhrase = string.Empty;
     private string movieName = string.Empty;
+    private string movieYear = string.Empty;
     private string movieId = string.Empty;
 
 
@@ -72,7 +74,7 @@ else
         string url = "";
         try
         {
-            MovieQuery query = new(movieName, movieId, getMovieByName);
+            MovieQuery query = new(movieName, movieId, movieYear, getMovieByName);
             url = query.GenerateQuery();
         }
         catch
@@ -100,6 +102,7 @@ else
     private void ClearData()
     {
         movieName = string.Empty;
+        movieYear = string.Empty;
         movieId = string.Empty;
         movie = new();
     }
