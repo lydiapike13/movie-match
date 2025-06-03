@@ -1,7 +1,118 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using BlazorBootstrap
 
-<h1>Hello, world!</h1>
+@inject HttpClient Client
 
-Welcome to your new app.
+<PageTitle>MovieMatch</PageTitle>
+
+<div>
+    <label>Match movie by IMDb ID?</label>
+    <Switch @bind-Value="getMovieByName" @onclick="ClearData" />
+    <label>Match movie by name?</label>
+
+</div>
+
+<EditForm Model="movieInput" OnValidSubmit="Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    @if (@getMovieByName)
+    {
+        <div>
+            <InputText @bind-Value="movieInput.Name" placeholder="Input Movie Name" />
+            <input type="submit" value="Submit" class="btn btn-primary" />
+        </div>
+    }
+    else
+    {
+        <div>
+            <InputText @bind-Value="movieInput.Id" placeholder="Input Movie IMDb ID" />
+            <input type="submit" value="Submit" class="btn btn-primary" />
+        </div>
+    }
+</EditForm>
+
+@if (getMovieError || movie is null)
+{
+    <p>Unable to retrieve movie: @reasonPhrase</p>
+}
+else
+{
+    <ul>
+        <li>@movie.Title</li>
+        <li>@movie.Year</li>
+        <li>@movie.Rated</li>
+        <li>@movie.Released</li>
+        <li>@movie.Runtime</li>
+        <li>@movie.Genre</li>
+        <li>@movie.Director</li>
+        <li>@movie.Writer</li>
+        <li>@movie.Actors</li>
+        <li>@movie.Plot</li>
+        <li>@movie.Language</li>
+        <li>@movie.Country</li>
+        <li>@movie.Awards</li>
+    </ul>
+}
+
+@code {
+    private bool getMovieByName = true;
+    private Movie movie = new();
+    private bool getMovieError;
+    private string reasonPhrase;
+    private string apiUrl = "http://www.omdbapi.com";
+    private string apiKey = "&apikey=930aab22";
+    private string titleQuerier = "?t=";
+    private string idQuerier = "?i=";
+
+    private MovieInput movieInput = new();
+
+    private async void Submit()
+    {
+        string query = "";
+        if (getMovieByName && movieInput.Name is not null && movieInput.Name != string.Empty)
+        {
+            query = titleQuerier + movieInput.Name.ToLower().Replace(' ', '+');
+        }
+        else if (!getMovieByName && movieInput.Id is not null && movieInput.Id != string.Empty)
+        {
+            query = idQuerier + movieInput.Id.ToLower().Replace(' ', '+');
+        }
+        else
+        {
+            reasonPhrase = "Please input movie name or ID";
+            getMovieError = true;
+        }
+
+        string url = apiUrl + query + apiKey;
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+
+        var response = await Client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            movie = await JsonSerializer.DeserializeAsync<Movie>(responseStream);
+        }
+        else
+        {
+            reasonPhrase = response.ReasonPhrase;
+            getMovieError = true;
+        }
+    }
+
+    private void ClearData()
+    {
+        movieInput.Name = string.Empty;
+        movieInput.Id = string.Empty;
+    }
+
+    public class MovieInput
+    {
+        public string Name { get; set; }
+        public string Id { get; set; }
+    }
+}
