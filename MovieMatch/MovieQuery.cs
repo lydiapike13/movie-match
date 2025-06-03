@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualBasic;
-
-namespace MovieMatch
+﻿namespace MovieMatch
 {
     public class MovieQuery(string name, string id, string? year, bool getMovieByName)
     {

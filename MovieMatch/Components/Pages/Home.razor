@@ -9,16 +9,16 @@
 
 <PageTitle>MovieMatch</PageTitle>
 
-<div>
-    <label>Match movie by IMDb ID?</label>
-    <Switch @bind-Value="getMovieByName" @onclick="ClearData" />
-    <label>Match movie by name?</label>
-
+<div class="form-group row mb-3">
+    <label class="col-md-2 col-form-label">Match by IMDb ID</label>
+    <div class="col-md-10">
+        <Switch Class="mt-2" @bind-Value="getMovieByName" @onclick="ClearData" Label="Match by name" />
+    </div>
 </div>
 
 <EditForm Model="movie" OnValidSubmit="Submit">
-@*     <DataAnnotationsValidator />
-    <ValidationSummary /> *@
+    <DataAnnotationsValidator />
+    <ValidationSummary />
     @if (@getMovieByName)
     {
         <div>
@@ -40,23 +40,22 @@
 {
     <p>Unable to retrieve movie: @reasonPhrase</p>
 }
-else
+else if (movie.Title != string.Empty && movie.Title is not null)
 {
-    <ul>
-        <li>@movie.Title</li>
-        <li>@movie.Year</li>
-        <li>@movie.Rated</li>
-        <li>@movie.Released</li>
-        <li>@movie.Runtime</li>
-        <li>@movie.Genre</li>
-        <li>@movie.Director</li>
-        <li>@movie.Writer</li>
-        <li>@movie.Actors</li>
-        <li>@movie.Plot</li>
-        <li>@movie.Language</li>
-        <li>@movie.Country</li>
-        <li>@movie.Awards</li>
-    </ul>
+    <Card Color="CardColor.Dark" Style="width:50rem;">
+        <CardBody>
+            <CardTitle>@movie.Title</CardTitle>
+            <CardSubTitle Class="mb-2 text-muted">@movie.Released, Rated @movie.Rated, @movie.Runtime</CardSubTitle>
+            <CardText>@movie.Plot</CardText>
+			<CardText><b>Genre: </b>@movie.Genre</CardText>
+            <CardText><b>Director: </b>@movie.Director</CardText>
+            <CardText><b>Writer: </b>@movie.Writer</CardText>
+            <CardText><b>Actors: </b>@movie.Actors</CardText>
+            <CardText><b>Language: </b>@movie.Language</CardText>
+            <CardText><b>Country: </b>@movie.Country</CardText>
+            <CardText><b>Awards: </b>@movie.Awards</CardText>
+        </CardBody>
+    </Card>
 }
 
 @code {
@@ -67,6 +66,7 @@ else
     private string movieName = string.Empty;
     private string movieYear = string.Empty;
     private string movieId = string.Empty;
+    Collapse collapse1 = default!;
 
 
     private async void Submit()
@@ -98,6 +98,8 @@ else
             getMovieError = true;
         }
     }
+
+    private async Task ShowContentAsync() => await collapse1.ShowAsync();
 
     private void ClearData()
     {
